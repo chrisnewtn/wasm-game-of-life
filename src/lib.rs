@@ -4,6 +4,14 @@ use std::fmt;
 
 use wasm_bindgen::prelude::*;
 
+extern crate web_sys;
+
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    };
+}
+
 #[wasm_bindgen]
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -22,6 +30,8 @@ pub struct Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
+        utils::set_panic_hook();
+
         let width = 64;
         let height = 64;
 
