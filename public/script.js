@@ -1,43 +1,39 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>WASM Game of Life</title>
-  <style>
-html {
-  background-color: #000;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-}
-body {
-  display: flex;
-  justify-content: center;
-}
-  </style>
-  <script type="module">
 import init, {Universe, Cell} from './pkg/wasm_game_of_life.js';
 
 const {memory} = await init();
 
 const universe = Universe.new();
-const width = universe.width();
-const height = universe.height();
 
-const CELL_SIZE = 5;
 const CELL_BORDER = 0;
 const GRID_COLOR = "#ccc";
 const DEAD_COLOR = "#000";
 const ALIVE_COLOR = "#fff";
 
+const width = universe.width();
+const height = universe.height();
+
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-of-life-canvas');
 
-canvas.height = (CELL_SIZE + CELL_BORDER) * height + CELL_BORDER;
-canvas.width = (CELL_SIZE + CELL_BORDER) * width + CELL_BORDER;
+let cellSize;
+
+const setCanvasDimensions = () => {
+  cellSize = Math.floor(
+    Math.min(
+      document.documentElement.clientHeight,
+      document.documentElement.clientWidth
+    ) / 64
+  );
+
+  canvas.height = (cellSize + CELL_BORDER) * height + CELL_BORDER;
+  canvas.width = (cellSize + CELL_BORDER) * width + CELL_BORDER;
+};
+
+window.addEventListener('resize', () => {
+  setCanvasDimensions();
+});
+
+setCanvasDimensions();
 
 const ctx = canvas.getContext('2d');
 
@@ -46,18 +42,22 @@ const drawGrid = () => {
   ctx.strokeStyle = GRID_COLOR;
 
   for (let i = 0; i <= width; i++) {
-    ctx.moveTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, 0);
-    ctx.lineTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, (CELL_SIZE + CELL_BORDER) * height + CELL_BORDER);
+    ctx.moveTo(i * (cellSize + CELL_BORDER) + CELL_BORDER, 0);
+    ctx.lineTo(i * (cellSize + CELL_BORDER) + CELL_BORDER, (cellSize + CELL_BORDER) * height + CELL_BORDER);
   }
 
   for (let j = 0; j <= height; j++) {
-    ctx.moveTo(0, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
-    ctx.lineTo((CELL_SIZE + CELL_BORDER) * width + CELL_BORDER, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
+    ctx.moveTo(0, j * (cellSize + CELL_BORDER) + CELL_BORDER);
+    ctx.lineTo((cellSize + CELL_BORDER) * width + CELL_BORDER, j * (cellSize + CELL_BORDER) + CELL_BORDER);
   }
 
   ctx.stroke();
 };
 
+/**
+ * @param {number} row
+ * @param {number} column
+ */
 const getIndex = (row, column) => {
   return row * width + column;
 };
@@ -77,10 +77,10 @@ const drawCells = () => {
         : ALIVE_COLOR;
 
       ctx.fillRect(
-        col * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
-        row * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
-        CELL_SIZE,
-        CELL_SIZE
+        col * (cellSize + CELL_BORDER) + CELL_BORDER,
+        row * (cellSize + CELL_BORDER) + CELL_BORDER,
+        cellSize,
+        cellSize
       );
     }
   }
@@ -107,9 +107,3 @@ const renderLoop = ts => {
 // drawGrid();
 drawCells();
 requestAnimationFrame(renderLoop);
-  </script>
-</head>
-<body>
-  <canvas id="game-of-life-canvas"></canvas>
-</body>
-</html>
