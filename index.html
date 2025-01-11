@@ -28,6 +28,7 @@ const width = universe.width();
 const height = universe.height();
 
 const CELL_SIZE = 5;
+const CELL_BORDER = 0;
 const GRID_COLOR = "#ccc";
 const DEAD_COLOR = "#000";
 const ALIVE_COLOR = "#fff";
@@ -35,8 +36,8 @@ const ALIVE_COLOR = "#fff";
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-of-life-canvas');
 
-canvas.height = (CELL_SIZE + 1) * height + 1;
-canvas.width = (CELL_SIZE + 1) * width + 1;
+canvas.height = (CELL_SIZE + CELL_BORDER) * height + CELL_BORDER;
+canvas.width = (CELL_SIZE + CELL_BORDER) * width + CELL_BORDER;
 
 const ctx = canvas.getContext('2d');
 
@@ -45,13 +46,13 @@ const drawGrid = () => {
   ctx.strokeStyle = GRID_COLOR;
 
   for (let i = 0; i <= width; i++) {
-    ctx.moveTo(i * (CELL_SIZE + 1) + 1, 0);
-    ctx.lineTo(i * (CELL_SIZE + 1) + 1, (CELL_SIZE + 1) * height + 1);
+    ctx.moveTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, 0);
+    ctx.lineTo(i * (CELL_SIZE + CELL_BORDER) + CELL_BORDER, (CELL_SIZE + CELL_BORDER) * height + CELL_BORDER);
   }
 
   for (let j = 0; j <= height; j++) {
-    ctx.moveTo(0, j * (CELL_SIZE + 1) + 1);
-    ctx.lineTo((CELL_SIZE + 1) * width + 1, j * (CELL_SIZE + 1) + 1);
+    ctx.moveTo(0, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
+    ctx.lineTo((CELL_SIZE + CELL_BORDER) * width + CELL_BORDER, j * (CELL_SIZE + CELL_BORDER) + CELL_BORDER);
   }
 
   ctx.stroke();
@@ -76,8 +77,8 @@ const drawCells = () => {
         : ALIVE_COLOR;
 
       ctx.fillRect(
-        col * (CELL_SIZE + 1) + 1,
-        row * (CELL_SIZE + 1) + 1,
+        col * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
+        row * (CELL_SIZE + CELL_BORDER) + CELL_BORDER,
         CELL_SIZE,
         CELL_SIZE
       );
@@ -87,11 +88,18 @@ const drawCells = () => {
   ctx.stroke();
 };
 
-const renderLoop = () => {
-  universe.tick();
+const TICK_RATE = 1000 / 30;
+let lastTick = performance.now();
 
-  // drawGrid();
-  drawCells();
+const renderLoop = ts => {
+  let diff = ts - lastTick;
+
+  if (diff >= TICK_RATE) {
+    lastTick = ts;
+    universe.tick();
+    // drawGrid();
+    drawCells();
+  }
 
   requestAnimationFrame(renderLoop);
 };
