@@ -1,0 +1,27 @@
+name: tests
+# Originally from: https://doc.rust-lang.org/cargo/guide/continuous-integration.html#github-actions
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_and_test:
+    name: WASM Game of Life - latest
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+          # - beta
+          # - nightly
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install wasm-pack
+      - run: wasm-pack test --firefox --headless
