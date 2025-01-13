@@ -178,6 +178,10 @@ const mouseToToggle = e => {
  * @param e {TouchEvent}
  */
 const touchToToggle = e => {
+  // stops Android pull-to-refresh behaviour that inhibits the
+  // user from painting their cells.
+  e.preventDefault();
+
   for (const touch of e.touches) {
     const {row, col} = clientCoordToRowCol(touch);
     toggleCell(row, col);
