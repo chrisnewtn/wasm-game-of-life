@@ -88,6 +88,8 @@ const drawCells = () => {
   ctx.stroke();
 };
 
+let animationId = null;
+
 const TICK_RATE = 1000 / 30;
 let lastTick = performance.now();
 
@@ -101,9 +103,30 @@ const renderLoop = ts => {
     drawCells();
   }
 
-  requestAnimationFrame(renderLoop);
+  animationId = requestAnimationFrame(renderLoop);
 };
 
-// drawGrid();
-drawCells();
-requestAnimationFrame(renderLoop);
+const isPaused = () => animationId === null;
+
+const playPauseButton = document.getElementById("play-pause");
+
+const play = () => {
+  playPauseButton.textContent = 'pause';
+  animationId = requestAnimationFrame(renderLoop);
+};
+
+const pause = () => {
+  playPauseButton.textContent = 'play';
+  cancelAnimationFrame(animationId);
+  animationId = null;
+};
+
+playPauseButton.addEventListener('click', () => {
+  if (isPaused()) {
+    play();
+  } else {
+    pause();
+  }
+});
+
+play();
