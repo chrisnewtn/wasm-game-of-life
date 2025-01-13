@@ -3,6 +3,9 @@ name: tests
 
 on:
   push:
+    paths:
+      - '**.rs'
+      - '**.toml'
     branches: ["main"]
   pull_request:
 
