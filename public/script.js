@@ -130,3 +130,21 @@ playPauseButton.addEventListener('click', () => {
 });
 
 play();
+
+canvas.addEventListener('click', e => {
+  const boundingRect = canvas.getBoundingClientRect();
+
+  const scaleX = canvas.width / boundingRect.width;
+  const scaleY = canvas.height / boundingRect.height;
+
+  const canvasLeft = (e.clientX - boundingRect.left) * scaleX;
+  const canvasTop = (e.clientY - boundingRect.top) * scaleY;
+
+  const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
+  const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
+
+  universe.toggle_cell(row, col);
+
+  //drawGrid();
+  drawCells();
+});
