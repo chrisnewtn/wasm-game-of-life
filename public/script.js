@@ -133,21 +133,7 @@ play();
 
 const toggled = new Set();
 
-/**
- * @param e {MouseEvent}
- */
-const toggleCell = e => {
-  const boundingRect = canvas.getBoundingClientRect();
-
-  const scaleX = canvas.width / boundingRect.width;
-  const scaleY = canvas.height / boundingRect.height;
-
-  const canvasLeft = (e.clientX - boundingRect.left) * scaleX;
-  const canvasTop = (e.clientY - boundingRect.top) * scaleY;
-
-  const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
-  const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
-
+const toggleCell = (row, col) => {
   const cell = `${row}:${col}`;
 
   // prevents the user for erasing their cells as they draw them.
@@ -162,13 +148,52 @@ const toggleCell = e => {
   drawCells();
 };
 
-canvas.addEventListener('mousemove', e => {
-  if (e.buttons !== 1) {
-    return;
-  }
-  toggleCell(e);
-});
+/**
+ * @param e {MouseEvent | Touch}
+ */
+const clientCoordToRowCol = e => {
+  const boundingRect = canvas.getBoundingClientRect();
 
-canvas.addEventListener('mousedown', toggleCell);
+  const scaleX = canvas.width / boundingRect.width;
+  const scaleY = canvas.height / boundingRect.height;
+
+  const canvasLeft = (e.clientX - boundingRect.left) * scaleX;
+  const canvasTop = (e.clientY - boundingRect.top) * scaleY;
+
+  const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
+  const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
+
+  return {row, col};
+}
+
+/**
+ * @param e {MouseEvent}
+ */
+const mouseToToggle = e => {
+  const {row, col} = clientCoordToRowCol(e);
+  toggleCell(row, col);
+};
+
+/**
+ * @param e {TouchEvent}
+ */
+const touchToToggle = e => {
+  for (const touch of e.touches) {
+    const {row, col} = clientCoordToRowCol(touch);
+    toggleCell(row, col);
+  }
+};
+
+canvas.addEventListener('mousemove', e => {
+  // only do anything when the user is holding down click.
+  if (e.buttons === 1) {
+    mouseToToggle(e);
+  }
+});
+canvas.addEventListener('mousedown', mouseToToggle);
+canvas.addEventListener('touchstart', touchToToggle);
+canvas.addEventListener('touchmove', touchToToggle);
 
 canvas.addEventListener('mouseup', () => toggled.clear());
+canvas.addEventListener('touchend', () => toggled.clear());
+canvas.addEventListener('touchcancel', () => toggled.clear());
