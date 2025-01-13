@@ -131,7 +131,12 @@ playPauseButton.addEventListener('click', () => {
 
 play();
 
-canvas.addEventListener('click', e => {
+const toggled = new Set();
+
+/**
+ * @param e {MouseEvent}
+ */
+const toggleCell = e => {
   const boundingRect = canvas.getBoundingClientRect();
 
   const scaleX = canvas.width / boundingRect.width;
@@ -143,8 +148,27 @@ canvas.addEventListener('click', e => {
   const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
   const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
 
-  universe.toggle_cell(row, col);
+  const cell = `${row}:${col}`;
 
+  // prevents the user for erasing their cells as they draw them.
+  if (toggled.has(cell)) {
+    return;
+  }
+
+  toggled.add(cell);
+
+  universe.toggle_cell(row, col);
   //drawGrid();
   drawCells();
+};
+
+canvas.addEventListener('mousemove', e => {
+  if (e.buttons !== 1) {
+    return;
+  }
+  toggleCell(e);
 });
+
+canvas.addEventListener('mousedown', toggleCell);
+
+canvas.addEventListener('mouseup', () => toggled.clear());

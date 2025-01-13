@@ -14,6 +14,9 @@ body {
   gap: 1rem;
   align-content: stretch;
 }
+canvas {
+  cursor: crosshair;
+}
 .buttons {
   display: flex;
   flex-direction: row;
