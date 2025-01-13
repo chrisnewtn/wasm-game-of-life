@@ -10,8 +10,9 @@ html, body {
 body {
   display: grid;
   place-content: center;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: min-content auto min-content;
   gap: 1rem;
+  align-content: stretch;
 }
 .buttons {
   display: flex;
@@ -33,4 +34,14 @@ button {
 }
 button:last-of-type {
   margin-right: 0;
+}
+footer {
+  display: block;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+footer a,
+footer a:visited {
+  color: #999;
 }
