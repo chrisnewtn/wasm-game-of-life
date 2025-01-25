@@ -213,3 +213,12 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', mouseToToggle);
 canvas.addEventListener('touchstart', touchToToggle);
 canvas.addEventListener('touchmove', touchToToggle);
+
+const clearButton = document.getElementById('clear');
+
+clearButton.addEventListener('click', e => {
+  e.preventDefault();
+  universe.set_height(height);
+  universe.set_width(width);
+  drawCells();
+});
