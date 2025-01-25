@@ -97,7 +97,41 @@ impl Universe {
         self.cells[idx] = cell;
     }
 
+    pub fn draw_circle(&mut self, c_x: u32, c_y: u32, radius: u32) {
+        let mut d: f64 = (5.0 - radius as f64 * 4.0) / 4.0;
+        let mut x = 0;
+        let mut y = radius;
+
+        loop {
+            self.set_cells(&[
+                 (c_y + y, c_x + x),
+                 (c_y - y, c_x + x),
+                 (c_y + y, c_x - x),
+                 (c_y - y, c_x - x),
+                 (c_y + x, c_x + y),
+                 (c_y - x, c_x + y),
+                 (c_y + x, c_x - y),
+                 (c_y - x, c_x - y),
+            ]);
+
+            if d < 0.0 {
+                d += 2.0 * x as f64 + 1.0;
+            } else {
+                d += 2.0 * (x as f64 - y as f64) + 1.0;
+                y = (y + (self.height - 1)) % self.height;
+            }
+
+            x = (x + 1) % self.width;
+
+            if x > y {
+                break;
+            }
+        }
+    }
+
     fn get_index(&self, row: u32, column: u32) -> usize {
+        let row = row % self.height;
+        let column = column % self.width;
         (row * self.width + column) as usize
     }
 
