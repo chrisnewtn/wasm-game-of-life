@@ -92,6 +92,11 @@ impl Universe {
         self.cells[idx].toggle();
     }
 
+    pub fn set_cell(&mut self, row: u32, column: u32, cell: Cell) {
+        let idx = self.get_index(row, column);
+        self.cells[idx] = cell;
+    }
+
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
     }
@@ -148,8 +153,7 @@ impl Universe {
 
     pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
         for (row, col) in cells.iter().cloned() {
-            let idx = self.get_index(row, col);
-            self.cells[idx] = Cell::Alive;
+            self.set_cell(row, col, Cell::Alive);
         }
     }
 }
