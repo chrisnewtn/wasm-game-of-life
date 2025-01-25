@@ -9,31 +9,36 @@ const GRID_COLOR = "#ccc";
 const DEAD_COLOR = "#000";
 const ALIVE_COLOR = "#fff";
 
-const width = universe.width();
-const height = universe.height();
+let uWidth = universe.width();
+let uHeight = universe.height();
 
 /** @type {HTMLCanvasElement} */
 const canvas = document.getElementById('game-of-life-canvas');
 
-let cellSize;
+const cellSize = 5;
 
-const setCanvasDimensions = () => {
-  cellSize = Math.floor(
-    Math.min(
-      document.documentElement.clientHeight,
-      document.documentElement.clientWidth
-    ) / 64
-  );
+const setUniverseDimensions = () => {
+  const {width: w, height: h} = canvas.getBoundingClientRect();
 
-  canvas.height = (cellSize + CELL_BORDER) * height + CELL_BORDER;
-  canvas.width = (cellSize + CELL_BORDER) * width + CELL_BORDER;
+  const width = Math.floor(Math.max(w, window.innerWidth));
+  const height = Math.floor(h);
+
+  const blockSize = 8;
+
+  const blocksWide = Math.floor(width / cellSize / blockSize);
+  const blocksHigh = Math.floor(height / cellSize / blockSize);
+
+  uWidth = blockSize * blocksWide;
+  uHeight = blockSize * blocksHigh;
+
+  universe.resize_and_seed(uWidth, uHeight);
+
+  canvas.width = uWidth * cellSize;
+  canvas.height = uHeight * cellSize;
 };
 
-window.addEventListener('resize', () => {
-  setCanvasDimensions();
-});
-
-setCanvasDimensions();
+window.addEventListener('resize', setUniverseDimensions);
+setUniverseDimensions();
 
 const ctx = canvas.getContext('2d');
 
@@ -41,14 +46,14 @@ const drawGrid = () => {
   ctx.beginPath();
   ctx.strokeStyle = GRID_COLOR;
 
-  for (let i = 0; i <= width; i++) {
+  for (let i = 0; i <= uWidth; i++) {
     ctx.moveTo(i * (cellSize + CELL_BORDER) + CELL_BORDER, 0);
-    ctx.lineTo(i * (cellSize + CELL_BORDER) + CELL_BORDER, (cellSize + CELL_BORDER) * height + CELL_BORDER);
+    ctx.lineTo(i * (cellSize + CELL_BORDER) + CELL_BORDER, (cellSize + CELL_BORDER) * uHeight + CELL_BORDER);
   }
 
-  for (let j = 0; j <= height; j++) {
+  for (let j = 0; j <= uHeight; j++) {
     ctx.moveTo(0, j * (cellSize + CELL_BORDER) + CELL_BORDER);
-    ctx.lineTo((cellSize + CELL_BORDER) * width + CELL_BORDER, j * (cellSize + CELL_BORDER) + CELL_BORDER);
+    ctx.lineTo((cellSize + CELL_BORDER) * uWidth + CELL_BORDER, j * (cellSize + CELL_BORDER) + CELL_BORDER);
   }
 
   ctx.stroke();
@@ -59,17 +64,17 @@ const drawGrid = () => {
  * @param {number} column
  */
 const getIndex = (row, column) => {
-  return row * width + column;
+  return row * uWidth + column;
 };
 
 const drawCells = () => {
   const cellsPtr = universe.cells();
-  const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+  const cells = new Uint8Array(memory.buffer, cellsPtr, uWidth * uHeight);
 
   ctx.beginPath();
 
-  for (let row = 0; row < height; row++) {
-    for (let col = 0; col < width; col++) {
+  for (let row = 0; row < uHeight; row++) {
+    for (let col = 0; col < uWidth; col++) {
       const idx = getIndex(row, col);
 
       ctx.fillStyle = cells[idx] === Cell.Dead
@@ -160,8 +165,8 @@ function screenCoordToCanvasCoord(x, y) {
   const canvasLeft = (x - boundingRect.left) * scaleX;
   const canvasTop = (y - boundingRect.top) * scaleY;
 
-  const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
-  const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
+  const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), uHeight - CELL_BORDER);
+  const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), uWidth - CELL_BORDER);
 
   return {row, col};
 }
@@ -182,7 +187,7 @@ function paintCircle(touch) {
 const mouseToToggle = e => {
   const {row, col} = clientCoordToRowCol(e);
 
-  if (e.ctrlKey && col < width - 1 && row < width - 1) {
+  if (e.ctrlKey && col < uWidth - 1 && row < uWidth - 1) {
     paintGlider(row, col);
   } else {
     paintCell(row, col);
@@ -218,7 +223,15 @@ const clearButton = document.getElementById('clear');
 
 clearButton.addEventListener('click', e => {
   e.preventDefault();
-  universe.set_height(height);
-  universe.set_width(width);
+  universe.set_height(uHeight);
+  universe.set_width(uWidth);
+  drawCells();
+});
+
+const resetButton = document.getElementById('reset');
+
+resetButton.addEventListener('click', e => {
+  e.preventDefault();
+  universe.resize_and_seed(uWidth, uHeight);
   drawCells();
 });

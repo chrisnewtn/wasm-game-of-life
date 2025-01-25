@@ -36,6 +36,18 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+fn generate_cells(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height)
+        .map(|i| {
+            if i % 2 == 0 || i % 7 == 0 {
+                Cell::Alive
+            } else {
+                Cell::Dead
+            }
+        })
+        .collect()
+}
+
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
@@ -44,15 +56,7 @@ impl Universe {
         let width = 64;
         let height = 64;
 
-        let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
+        let cells = generate_cells(width, height);
 
         Universe {
             width,
@@ -85,6 +89,16 @@ impl Universe {
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells = (0..self.width * height).map(|_| Cell::Dead).collect();
+    }
+
+    pub fn seed_cells(&mut self) {
+        self.cells = generate_cells(self.width, self.height);
+    }
+
+    pub fn resize_and_seed(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
+        self.seed_cells();
     }
 
     pub fn toggle_cell(&mut self, row: u32, column: u32) {

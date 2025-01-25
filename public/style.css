@@ -10,12 +10,14 @@ html, body {
 body {
   display: grid;
   place-content: center;
-  grid-template-rows: min-content auto min-content;
+  grid-template-rows: auto min-content min-content;
   gap: 1rem;
   align-content: stretch;
 }
 canvas {
   cursor: crosshair;
+  align-self: stretch;
+  max-width: 100%;
 }
 .buttons {
   display: flex;
