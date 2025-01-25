@@ -131,7 +131,7 @@ playPauseButton.addEventListener('click', () => {
 
 play();
 
-const pantCell = (row, col) => {
+const paintCell = (row, col) => {
   universe.set_cell(row, col, Cell.Alive);
   //drawGrid();
   drawCells();
@@ -173,7 +173,7 @@ const mouseToToggle = e => {
   if (e.ctrlKey && col < width - 1 && row < width - 1) {
     paintGlider(row, col);
   } else {
-    pantCell(row, col);
+    paintCell(row, col);
   }
 };
 
@@ -187,7 +187,7 @@ const touchToToggle = e => {
 
   for (const touch of e.touches) {
     const {row, col} = clientCoordToRowCol(touch);
-    pantCell(row, col);
+    paintCell(row, col);
   }
 };
 
