@@ -149,19 +149,31 @@ const paintGlider = (row, col) => {
 /**
  * @param e {MouseEvent | Touch}
  */
-const clientCoordToRowCol = e => {
+const clientCoordToRowCol = e => screenCoordToCanvasCoord(e.clientX, e.clientY);
+
+function screenCoordToCanvasCoord(x, y) {
   const boundingRect = canvas.getBoundingClientRect();
 
   const scaleX = canvas.width / boundingRect.width;
   const scaleY = canvas.height / boundingRect.height;
 
-  const canvasLeft = (e.clientX - boundingRect.left) * scaleX;
-  const canvasTop = (e.clientY - boundingRect.top) * scaleY;
+  const canvasLeft = (x - boundingRect.left) * scaleX;
+  const canvasTop = (y - boundingRect.top) * scaleY;
 
   const row = Math.min(Math.floor(canvasTop / (cellSize + CELL_BORDER)), height - CELL_BORDER);
   const col = Math.min(Math.floor(canvasLeft / (cellSize + CELL_BORDER)), width - CELL_BORDER);
 
   return {row, col};
+}
+
+/**
+ * @param touch {Touch}
+ */
+function paintCircle(touch) {
+  const {row: y, col: x} = clientCoordToRowCol(touch);
+  const {row: rY, col: rX} = screenCoordToCanvasCoord(touch.radiusX, touch.radiusY);
+  const radius = Math.max(rX, rY);
+  universe.draw_circle(x, y, radius);
 }
 
 /**
@@ -185,10 +197,11 @@ const touchToToggle = e => {
   // user from painting their cells.
   e.preventDefault();
 
-  for (const touch of e.touches) {
-    const {row, col} = clientCoordToRowCol(touch);
-    paintCell(row, col);
+  for (const touch of e.changedTouches) {
+    paintCircle(touch);
   }
+
+  drawCells();
 };
 
 canvas.addEventListener('mousemove', e => {
