@@ -131,20 +131,18 @@ playPauseButton.addEventListener('click', () => {
 
 play();
 
-const toggled = new Set();
-
-const toggleCell = (row, col) => {
-  const cell = `${row}:${col}`;
-
-  // prevents the user for erasing their cells as they draw them.
-  if (toggled.has(cell)) {
-    return;
-  }
-
-  toggled.add(cell);
-
-  universe.toggle_cell(row, col);
+const pantCell = (row, col) => {
+  universe.set_cell(row, col, Cell.Alive);
   //drawGrid();
+  drawCells();
+};
+
+const paintGlider = (row, col) => {
+  universe.set_cell(row, col, Cell.Alive);
+  universe.set_cell(row + 1, col + 1, Cell.Alive);
+  universe.set_cell(row + 2, col - 1, Cell.Alive);
+  universe.set_cell(row + 2, col, Cell.Alive);
+  universe.set_cell(row + 2, col + 1, Cell.Alive);
   drawCells();
 };
 
@@ -171,7 +169,12 @@ const clientCoordToRowCol = e => {
  */
 const mouseToToggle = e => {
   const {row, col} = clientCoordToRowCol(e);
-  toggleCell(row, col);
+
+  if (e.ctrlKey && col < width - 1 && row < width - 1) {
+    paintGlider(row, col);
+  } else {
+    pantCell(row, col);
+  }
 };
 
 /**
@@ -184,7 +187,7 @@ const touchToToggle = e => {
 
   for (const touch of e.touches) {
     const {row, col} = clientCoordToRowCol(touch);
-    toggleCell(row, col);
+    pantCell(row, col);
   }
 };
 
@@ -197,7 +200,3 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mousedown', mouseToToggle);
 canvas.addEventListener('touchstart', touchToToggle);
 canvas.addEventListener('touchmove', touchToToggle);
-
-canvas.addEventListener('mouseup', () => toggled.clear());
-canvas.addEventListener('touchend', () => toggled.clear());
-canvas.addEventListener('touchcancel', () => toggled.clear());
