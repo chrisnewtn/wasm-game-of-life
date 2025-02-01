@@ -16,6 +16,9 @@ const TICK_RATE_DEFAULT = 1000 / 24;
 const CELL_SIZE_DEFAULT = 5;
 const CELL_BORDER_DEFAULT = 0;
 
+const BACKGROUND_COLOR_DEFAULT = '#000';
+const FOREGROUND_COLOR_DEFAULT = '#fff';
+
 
 export default class GameOfLife extends HTMLElement {
   static observedAttributes = [
@@ -24,6 +27,8 @@ export default class GameOfLife extends HTMLElement {
     'cell-size',
     'cell-border',
     'tick-rate',
+    'background-color',
+    'color',
   ];
 
   #universe = Universe.new();
@@ -35,8 +40,8 @@ export default class GameOfLife extends HTMLElement {
   width = 64;
   height = 64;
   gridColor = "#ccc";
-  deadColor = "#000";
-  aliveColor = "#fff";
+  deadColor = BACKGROUND_COLOR_DEFAULT;
+  aliveColor = FOREGROUND_COLOR_DEFAULT;
   autoplay = false;
   interactive = false;
 
@@ -79,6 +84,13 @@ export default class GameOfLife extends HTMLElement {
         if (Number.isNaN(this.tickRate)) {
           this.tickRate = TICK_RATE_DEFAULT;
         }
+        break;
+      case 'background-color':
+        this.deadColor = newValue || BACKGROUND_COLOR_DEFAULT;
+        break;
+      case 'color':
+        this.aliveColor = newValue || FOREGROUND_COLOR_DEFAULT;
+        break;
     }
   }
 
