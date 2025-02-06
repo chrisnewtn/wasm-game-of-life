@@ -1,5 +1,23 @@
+:root {
+  --bg-color: #fff;
+  --fg-color: #000;
+  --alt-color: #999;
+  --button-bg: #ccc;
+  --button-fg: var(--fg-color);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #000;
+    --fg-color: #fff;
+    --alt-color: #999;
+    --button-bg: var(--fg-color);
+    --button-fg: var(--bg-color);
+  }
+}
+
 html {
-  background-color: #000;
+  background-color: var(--bg-color);
 }
 html, body {
   margin: 0;
@@ -23,8 +41,8 @@ body {
 button {
   border: 0;
   border-radius: 0;
-  background: #fff;
-  color: #000;
+  background: var(--button-bg);
+  color: var(--button-fg);
   font-family: -system-ui, sans-serif;
   font-size: 1rem;
   text-decoration: none;
@@ -43,5 +61,5 @@ footer {
 
 footer a,
 footer a:visited {
-  color: #999;
+  color: var(--alt-color);
 }

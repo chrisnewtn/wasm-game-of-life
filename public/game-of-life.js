@@ -6,6 +6,9 @@ const {memory} = await init();
 
 const template = document.createElement('template');
 template.innerHTML = `<style>
+:host {
+  display: block;
+}
 canvas {
   cursor: crosshair;
 }
@@ -18,6 +21,13 @@ const CELL_BORDER_DEFAULT = 0;
 
 const BACKGROUND_COLOR_DEFAULT = '#000';
 const FOREGROUND_COLOR_DEFAULT = '#fff';
+const DARK_BACKGROUND_COLOR_DEFAULT = FOREGROUND_COLOR_DEFAULT;
+const DARK_FOREGROUND_COLOR_DEFAULT = BACKGROUND_COLOR_DEFAULT;
+
+
+function isDarkMode() {
+  return 'matchMedia' in window && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
 
 
 export default class GameOfLife extends HTMLElement {
@@ -27,7 +37,7 @@ export default class GameOfLife extends HTMLElement {
     'cell-size',
     'cell-border',
     'tick-rate',
-    'background-color',
+    'bg-color',
     'color',
   ];
 
@@ -39,11 +49,17 @@ export default class GameOfLife extends HTMLElement {
   cellBorder = CELL_BORDER_DEFAULT;
   width = 64;
   height = 64;
+  autoplay = false;
+  interactive = false;
+
+  #bgColor = BACKGROUND_COLOR_DEFAULT;
+  #fgColor = FOREGROUND_COLOR_DEFAULT;
+  #darkBgColor = DARK_BACKGROUND_COLOR_DEFAULT;
+  #darkFgColor = DARK_FOREGROUND_COLOR_DEFAULT;
+
   gridColor = "#ccc";
   deadColor = BACKGROUND_COLOR_DEFAULT;
   aliveColor = FOREGROUND_COLOR_DEFAULT;
-  autoplay = false;
-  interactive = false;
 
   get isPaused() {
     return this.#animationId === null;
@@ -85,11 +101,17 @@ export default class GameOfLife extends HTMLElement {
           this.tickRate = TICK_RATE_DEFAULT;
         }
         break;
-      case 'background-color':
-        this.deadColor = newValue || BACKGROUND_COLOR_DEFAULT;
+      case 'bg-color':
+        this.#bgColor = newValue || BACKGROUND_COLOR_DEFAULT;
         break;
       case 'color':
-        this.aliveColor = newValue || FOREGROUND_COLOR_DEFAULT;
+        this.#fgColor = newValue || FOREGROUND_COLOR_DEFAULT;
+        break;
+      case 'dark-bg-color':
+        this.#darkBgColor = newValue || DARK_BACKGROUND_COLOR_DEFAULT;
+        break;
+      case 'dark-color':
+        this.#darkFgColor = newValue || DARK_FOREGROUND_COLOR_DEFAULT;
         break;
     }
   }
@@ -109,10 +131,16 @@ export default class GameOfLife extends HTMLElement {
     /** @type {CanvasRenderingContext2D} */
     this.ctx = this.canvas.getContext('2d');
 
+    this.setColors();
     this.setDimensions();
 
     if (this.autoplay) {
       this.play();
+    }
+
+    if ('matchMedia' in window) {
+      window.matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', e => this.setColors(e.matches));
     }
 
     if (!this.interactive) {
@@ -168,6 +196,16 @@ export default class GameOfLife extends HTMLElement {
   setDimensions() {
     this.#universe.resize_and_seed(this.width, this.height);
     this.#setCanvasDimensions();
+  }
+
+  setColors(darkMode = isDarkMode()) {
+    if (darkMode) {
+      this.deadColor = this.#bgColor;
+      this.aliveColor = this.#fgColor;
+    } else {
+      this.deadColor = this.#darkBgColor;
+      this.aliveColor = this.#darkFgColor;
+    }
   }
 
   /**
