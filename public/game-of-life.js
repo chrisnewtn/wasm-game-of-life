@@ -39,6 +39,8 @@ export default class GameOfLife extends HTMLElement {
     'tick-rate',
     'bg-color',
     'color',
+    'dark-bg-color',
+    'dark-color',
   ];
 
   #universe = Universe.new();
